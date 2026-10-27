@@ -1,0 +1,13 @@
+: 1
+name: libdomainez
+version: 1.0.0
+language: c++
+summary: DNS library for common european registrars
+license: BSD-3-Clause
+description-file: README.md
+url: https://github.com/Plaristote/libdomainez
+email: michael@unetresgrossebite.com
+depends: * build2 >= 0.18.0
+depends: * bpkg >= 0.18.0
+depends: libcurlez ^1.0.0
+depends: libdatatree ^2.0.0 

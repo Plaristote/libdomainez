@@ -1,0 +1,6 @@
+$out_root/
+{
+  include libdomainez/
+}
+
+export $out_root/libdomainez/$import.target

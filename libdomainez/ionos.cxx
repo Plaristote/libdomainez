@@ -203,6 +203,14 @@ Result<vector<string>> IonosProvider::nameservers(string_view)
   return result;
 }
 
+Result<bool> IonosProvider::serves_dns(string_view)
+{
+  Result<bool> result;
+ 
+  static_cast<Status&>(result) = not_implemented("ionos");
+  return result;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // DNS records
 ////////////////////////////////////////////////////////////////////////////////

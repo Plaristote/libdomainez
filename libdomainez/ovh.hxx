@@ -42,6 +42,7 @@ namespace DomainEz
     Status transfer(const Transfer&) override;
     Result<std::vector<std::string>> nameservers(std::string_view domain) override;
 
+    Result<bool> serves_dns(std::string_view domain) override;
     Result<std::vector<DnsRecord>> dns_records(std::string_view domain) override;
     Result<DnsRecord> dns_record(std::string_view domain, std::string_view name, std::string_view type) override;
     Status add_dns_record(const DnsRecord&) override;

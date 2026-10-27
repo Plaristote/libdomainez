@@ -328,6 +328,19 @@ Result<vector<string>> GandiProvider::nameservers(string_view domain_name)
   });
 }
 
+Result<bool> GandiProvider::serves_dns(string_view domain_name)
+{
+  Response response = send("GET", "/domain/domains/" + string(domain_name) + "/livedns", sharing_id_for(domain_name));
+
+  return parse_one<bool>(response, response.body, [](Data data) {
+    string current = data["current"].defaults_to<string>("");
+
+    if (current.empty())
+      throw runtime_error("no name server configuration in the answer");
+    return current == "livedns";
+  });
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // DNS records (LiveDNS)
 ////////////////////////////////////////////////////////////////////////////////

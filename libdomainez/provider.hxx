@@ -22,6 +22,7 @@ namespace DomainEz
     virtual Status transfer(const Transfer&) = 0;
     virtual Result<std::vector<std::string>> nameservers(std::string_view domain) = 0;
 
+    virtual Result<bool> serves_dns(std::string_view domain) = 0;
     virtual Result<std::vector<DnsRecord>> dns_records(std::string_view domain) = 0;
     virtual Result<DnsRecord> dns_record(std::string_view domain, std::string_view name, std::string_view type) = 0;
     virtual Status add_dns_record(const DnsRecord&) = 0;

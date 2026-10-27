@@ -240,6 +240,21 @@ Result<vector<string>> OvhProvider::nameservers(string_view domain_name)
   });
 }
 
+Result<bool> OvhProvider::serves_dns(string_view domain_name)
+{
+  Response response = send("GET", "/domain/" + string(domain_name));
+ 
+  return parse_one<bool>(response, response.body, [](Data data) {
+    string type = data["nameServerType"].defaults_to<string>("");
+ 
+    if (type == "hosted" || type == "anycast")
+      return true;
+    if (type == "external")
+      return false;
+    throw runtime_error("unknown nameServerType: " + type);
+  });
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // DNS records
 ////////////////////////////////////////////////////////////////////////////////

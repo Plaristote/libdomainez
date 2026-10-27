@@ -27,5 +27,6 @@ namespace DomainEz
     virtual Status add_dns_record(const DnsRecord&) = 0;
     virtual Status update_dns_record(const DnsRecord&) = 0;
     virtual Status delete_dns_record(const DnsRecord&) = 0;
+    virtual Status set_dns_record(const DnsRecord& record);
   };
 }

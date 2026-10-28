@@ -14,6 +14,12 @@ namespace DomainEz
   // OVH has no organizations: organizations() is always empty, and
   // Domain::organization_id is left blank.
   //
+  // OVH keeps domain names and DNS zones apart: a domain registered elsewhere
+  // whose DNS is hosted at OVH is a zone and nothing else, and each has its own
+  // contacts. domains() reports both (a zone-only domain has a name and a tld,
+  // and nothing else), which is also what a client must have delegated to you:
+  // the domain name and its DNS zone.
+  //
   // OVH stores one DNS entry per value, while DomainEz::DnsRecord is a record
   // set. Reading groups the entries by name and type, writing creates, updates
   // and deletes entries as needed, then refreshes the zone (OVH only publishes

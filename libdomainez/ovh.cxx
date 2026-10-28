@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <algorithm>
+#include <set>
 
 using namespace std;
 using namespace DomainEz;
@@ -160,23 +161,60 @@ Result<vector<Organization>> OvhProvider::organizations()
   return result;
 }
 
+// What went wrong, in a line, for a warning
+static string describe_failure(const Status& status)
+{
+  string detail = status.error.substr(0, 160);
+
+  if (status.status == 0)
+    return "request failed: " + detail;
+  return "HTTP " + to_string(status.status) + (detail.empty() ? string() : ": " + detail);
+}
+
+// Domain names registered at OVH, and DNS zones hosted at OVH: two lists,
+// that overlap for most domains but not all. One failing (the credentials may
+// lack the right for it) doesn't hide the other: it is reported in `warnings`.
 Result<vector<Domain>> OvhProvider::domains()
 {
-  Response response = send("GET", "/domain");
+  Result<vector<Domain>> result;
+  Status failed;
+  bool any_succeeded = false;
+  set<string> seen;
 
-  return parse_one<vector<Domain>>(response, response.body, [](Data data) {
-    vector<Domain> domains;
+  for (const char* path : {"/domain", "/domain/zone"})
+  {
+    Response response = send("GET", path);
+    Result<vector<string>> names = parse_one<vector<string>>(response, response.body, [](Data data) {
+      vector<string> names;
 
-    for (Data entry : data)
+      for (Data entry : data)
+        names.push_back(entry.as<string>());
+      return names;
+    });
+
+    if (!names.ok())
     {
+      failed = names;
+      //result.warnings.push_back(string("GET ") + path + ": " + describe_failure(names));
+      continue ;
+    }
+    any_succeeded = true;
+    for (const string& name : names.value)
+    {
+      if (!seen.insert(name).second)
+        continue ;
+
       Domain domain;
 
-      domain.name = entry.as<string>();
-      domain.tld = tld_of(domain.name);
-      domains.push_back(domain);
+      domain.name = name;
+      domain.tld = tld_of(name);
+      result.value.push_back(domain);
     }
-    return domains;
-  });
+  }
+  if (!any_succeeded)
+    return result;
+  result.status = 200;
+  return result;
 }
 
 Result<Domain> OvhProvider::domain(string_view domain_name)
@@ -192,7 +230,23 @@ Result<Domain> OvhProvider::domain(string_view domain_name)
     return domain;
   });
 
-  if (result.ok())
+  if (result.is_missing())
+  {
+    // Not a domain name registered at OVH. It may be a DNS zone hosted there,
+    // of which all we know is that it exists.
+    Response zone = send("GET", zone_path(name));
+
+    if (zone.ok())
+    {
+      result.status = 200;
+      result.error.clear();
+      result.value.name = name;
+      result.value.tld = tld_of(name);
+    }
+    else if (!zone.is_missing())
+      static_cast<Status&>(result) = zone;
+  }
+  else if (result.ok())
   {
     // Dates and renewal live in the service information. Best effort: a token
     // that can't read them still gets the basic details.

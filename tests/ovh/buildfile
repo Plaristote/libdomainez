@@ -1,0 +1,3 @@
+import libs = libdomainez%lib{domainez}
+
+exe{driver}: {hxx ixx txx cxx}{**} $libs testscript{**}

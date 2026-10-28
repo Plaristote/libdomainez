@@ -27,3 +27,16 @@ This package provides the following importable targets:
 ```
 lib{domainez}
 ```
+
+## Providers
+# OVH
+Here are the rights you must register for your API token:
+
+```
+GET	    /domain
+GET	    /domain/*
+POST	/domain/zone/*/record
+PUT	    /domain/zone/*/record/*
+DELETE	/domain/zone/*/record/*
+POST	/domain/zone/*/refresh
+```
